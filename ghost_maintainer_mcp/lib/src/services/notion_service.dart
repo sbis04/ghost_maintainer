@@ -110,7 +110,7 @@ class NotionService {
 
     final sorts = {
       'sorts': [
-        {'property': 'Created', 'direction': 'descending'}
+        {'timestamp': 'created_time', 'direction': 'descending'}
       ]
     };
 

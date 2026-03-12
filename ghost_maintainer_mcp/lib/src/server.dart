@@ -55,28 +55,19 @@ Available prompts:
     notion = NotionService(token: config.notionToken, databaseId: config.notionDatabaseId);
     github = GitHubService(token: config.githubToken);
     gemini = GeminiService(apiKey: config.geminiApiKey);
-  }
 
-  @override
-  FutureOr<InitializeResult> initialize(InitializeRequest request) async {
-    final result = await super.initialize(request);
-
-    // Register tools
+    // Register tools, resources, and prompts eagerly in constructor
     registerGetBacklogTool(this);
     registerTriageIssueTool(this);
     registerInvestigateIssueTool(this);
     registerDeployFixTool(this);
     registerSyncStatusTool(this);
 
-    // Register resources
     registerVisionResource(this);
     registerBacklogSummaryResource(this);
 
-    // Register prompts
     registerTriagePrompt(this);
     registerInvestigatePrompt(this);
-
-    return result;
   }
 
   @override
