@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:dart_mcp/server.dart';
 
 import 'config.dart';
-import 'services/anthropic_service.dart';
+import 'services/gemini_service.dart';
 import 'services/github_service.dart';
 import 'services/notion_service.dart';
 
@@ -24,7 +24,7 @@ base class GhostMaintainerServer extends MCPServer
   final Config config;
   late final NotionService notion;
   late final GitHubService github;
-  late final AnthropicService anthropic;
+  late final GeminiService gemini;
 
   GhostMaintainerServer(
     super.channel, {
@@ -54,7 +54,7 @@ Available prompts:
         ) {
     notion = NotionService(token: config.notionToken, databaseId: config.notionDatabaseId);
     github = GitHubService(token: config.githubToken);
-    anthropic = AnthropicService(apiKey: config.anthropicApiKey);
+    gemini = GeminiService(apiKey: config.geminiApiKey);
   }
 
   @override
@@ -83,7 +83,7 @@ Available prompts:
   Future<void> shutdown() async {
     notion.dispose();
     github.dispose();
-    anthropic.dispose();
+    gemini.dispose();
     await super.shutdown();
   }
 }

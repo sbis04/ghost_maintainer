@@ -6,7 +6,7 @@ class Config {
   final String notionVisionPageId;
   final String githubToken;
   final String targetRepo;
-  final String anthropicApiKey;
+  final String geminiApiKey;
 
   Config({
     required this.notionToken,
@@ -14,7 +14,7 @@ class Config {
     required this.notionVisionPageId,
     required this.githubToken,
     required this.targetRepo,
-    required this.anthropicApiKey,
+    required this.geminiApiKey,
   });
 
   factory Config.fromEnv() {
@@ -32,7 +32,7 @@ class Config {
       notionVisionPageId: require('NOTION_VISION_PAGE_ID'),
       githubToken: require('GITHUB_TOKEN'),
       targetRepo: require('TARGET_REPO'),
-      anthropicApiKey: require('ANTHROPIC_API_KEY'),
+      geminiApiKey: require('GEMINI_API_KEY'),
     );
   }
 

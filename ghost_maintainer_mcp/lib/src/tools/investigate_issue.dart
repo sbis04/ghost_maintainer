@@ -76,7 +76,7 @@ void registerInvestigateIssueTool(GhostMaintainerServer server) {
     await server.notion.updatePageProperties(pageId, stage: 'Investigating');
 
     // 6. Call Claude to investigate and propose fix
-    final result = await server.anthropic.investigateAndFix(
+    final result = await server.gemini.investigateAndFix(
       issueTitle: title,
       issueBody: issueBody,
       relevantFiles: relevantFiles,

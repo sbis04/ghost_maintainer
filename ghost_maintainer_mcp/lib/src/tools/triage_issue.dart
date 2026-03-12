@@ -36,7 +36,7 @@ void registerTriageIssueTool(GhostMaintainerServer server) {
         await server.notion.getVisionStatement(server.config.notionVisionPageId);
 
     // 4. Call Claude for triage
-    final result = await server.anthropic.triageIssue(
+    final result = await server.gemini.triageIssue(
       issueTitle: title,
       issueBody: issueBody,
       visionStatement: vision,
