@@ -36,6 +36,8 @@ void main() async {
         '$baseDir/notion_setup/bin/auto_investigate.dart',
     'notion_setup/bin/auto_deploy.dart':
         '$baseDir/notion_setup/bin/auto_deploy.dart',
+    'notion_setup/bin/setup_all_databases.dart':
+        '$baseDir/notion_setup/bin/setup_all_databases.dart',
   };
 
   for (final entry in filesToPush.entries) {
