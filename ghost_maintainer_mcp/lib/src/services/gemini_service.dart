@@ -6,7 +6,7 @@ class GeminiService {
   final String apiKey;
   final _client = http.Client();
   static const _baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
-  static const _model = 'gemini-2.5-flash-preview-05-20';
+  static const _model = 'gemini-2.5-flash';
 
   GeminiService({required this.apiKey});
 
@@ -129,7 +129,7 @@ Confidence is 0-100 representing how confident you are the fix is correct.''';
         ],
         'generationConfig': {
           'temperature': 0.2,
-          'maxOutputTokens': 4096,
+          'maxOutputTokens': 16384,
           'responseMimeType': 'application/json',
         },
       }),
