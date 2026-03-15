@@ -38,6 +38,8 @@ void main() async {
         '$baseDir/notion_setup/bin/auto_deploy.dart',
     'notion_setup/bin/setup_all_databases.dart':
         '$baseDir/notion_setup/bin/setup_all_databases.dart',
+    '.github/workflows/implement_feature.yml':
+        '$baseDir/.github/workflows/implement_feature.yml',
   };
 
   for (final entry in filesToPush.entries) {
