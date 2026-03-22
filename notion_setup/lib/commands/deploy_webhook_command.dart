@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 import '../notion_client.dart';
 
@@ -82,11 +83,6 @@ Other values are read from .ghost_maintainer.env (created by setup).
     }
 
     final httpClient = http.Client();
-    final cfHeaders = {
-      'Authorization': 'Bearer $cfApiToken',
-      'Content-Type': 'application/javascript',
-    };
-
     print('');
     print('=== Deploying Ghost Maintainer Webhook ===');
     print('');
@@ -136,16 +132,36 @@ Other values are read from .ghost_maintainer.env (created by setup).
       workerScript = dlResponse.body;
     }
 
-    final deployResponse = await httpClient.put(
+    // Upload as ES module using multipart form
+    final metadata = jsonEncode({
+      'main_module': 'worker.js',
+      'compatibility_date': '2024-01-01',
+    });
+
+    final deployRequest = http.MultipartRequest(
+      'PUT',
       Uri.parse(
           'https://api.cloudflare.com/client/v4/accounts/$cfAccountId/workers/scripts/$workerName'),
-      headers: cfHeaders,
-      body: workerScript,
     );
+    deployRequest.headers['Authorization'] = 'Bearer $cfApiToken';
+    deployRequest.files.add(http.MultipartFile.fromString(
+      'metadata',
+      metadata,
+      contentType: MediaType('application', 'json'),
+    ));
+    deployRequest.files.add(http.MultipartFile.fromString(
+      'worker.js',
+      workerScript,
+      filename: 'worker.js',
+      contentType: MediaType('application', 'javascript+module'),
+    ));
 
-    if (deployResponse.statusCode != 200) {
+    final deployStreamedResponse = await deployRequest.send();
+    final deployBody = await deployStreamedResponse.stream.bytesToString();
+
+    if (deployStreamedResponse.statusCode != 200) {
       stderr.writeln(
-          'Failed to deploy worker: ${deployResponse.statusCode} ${deployResponse.body}');
+          'Failed to deploy worker: ${deployStreamedResponse.statusCode} $deployBody');
       exit(1);
     }
     print('  + Worker deployed');
