@@ -140,9 +140,9 @@ Get your tokens:
       print('[3/8] Adding one-click buttons to Notion...');
 
       final fixExpression =
-          'link("Fix", "$webhookUrl?issue=" + format(prop("Issue Number")) + "&type=bug&secret=$webhookSecret")';
+          '"$webhookUrl?issue=" + format(prop("Issue Number")) + "&type=bug&secret=$webhookSecret"';
       final implementExpression =
-          'link("Implement", "$webhookUrl?issue=" + format(prop("Issue Number")) + "&type=feature&secret=$webhookSecret")';
+          '"$webhookUrl?issue=" + format(prop("Issue Number")) + "&type=feature&secret=$webhookSecret"';
 
       await notionClient.updateDatabase(maintenanceDbId, properties: {
         'Fix': {

@@ -227,9 +227,9 @@ Other values are read from .ghost_maintainer.env (created by setup).
       final notionClient = NotionClient(token: notionToken);
 
       final fixExpression =
-          'link("Fix", "$workerUrl?issue=" + format(prop("Issue Number")) + "&type=bug&secret=$webhookSecret")';
+          '"$workerUrl?issue=" + format(prop("Issue Number")) + "&type=bug&secret=$webhookSecret"';
       final implementExpression =
-          'link("Implement", "$workerUrl?issue=" + format(prop("Issue Number")) + "&type=feature&secret=$webhookSecret")';
+          '"$workerUrl?issue=" + format(prop("Issue Number")) + "&type=feature&secret=$webhookSecret"';
 
       await notionClient.updateDatabase(maintenanceDbId, properties: {
         'Fix': {
