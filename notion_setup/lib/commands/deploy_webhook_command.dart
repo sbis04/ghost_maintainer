@@ -6,8 +6,6 @@ import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
-import '../notion_client.dart';
-
 /// `ghost_maintainer deploy-webhook` — deploy the Cloudflare Worker and
 /// add one-click buttons to Notion databases.
 class DeployWebhookCommand extends Command<void> {
@@ -24,14 +22,8 @@ class DeployWebhookCommand extends Command<void> {
       ..addOption('cf-api-token', help: 'Cloudflare API token (Workers permission)')
       ..addOption('github-token',
           help: 'GitHub PAT. Reads from .ghost_maintainer.env if omitted.')
-      ..addOption('notion-token',
-          help: 'Notion token. Reads from .ghost_maintainer.env if omitted.')
       ..addOption('repo',
           help: 'Target repo. Reads from .ghost_maintainer.env if omitted.')
-      ..addOption('maintenance-db-id',
-          help: 'Maintenance Backlog DB ID. Reads from env if omitted.')
-      ..addOption('feature-db-id',
-          help: 'Feature Backlog DB ID. Reads from env if omitted.')
       ..addOption('worker-name',
           help: 'Cloudflare Worker name', defaultsTo: 'ghost-maintainer')
       ..addOption('source-repo',
@@ -47,14 +39,8 @@ class DeployWebhookCommand extends Command<void> {
     final cfApiToken = argResults!['cf-api-token'] as String?;
     final githubToken =
         argResults!['github-token'] as String? ?? env['GITHUB_TOKEN'];
-    final notionToken =
-        argResults!['notion-token'] as String? ?? env['NOTION_TOKEN'];
     final targetRepo =
         argResults!['repo'] as String? ?? env['TARGET_REPO'] ?? _detectRepo();
-    final maintenanceDbId =
-        argResults!['maintenance-db-id'] as String? ?? env['NOTION_DATABASE_ID'];
-    final featureDbId =
-        argResults!['feature-db-id'] as String? ?? env['NOTION_FEATURE_DB_ID'];
     final workerName = argResults!['worker-name'] as String;
     final sourceRepo = argResults!['source-repo'] as String;
 
@@ -220,44 +206,24 @@ Other values are read from .ghost_maintainer.env (created by setup).
       print('    Enable manually: Workers & Pages > $workerName > Settings > Triggers > workers.dev');
     }
 
-    // 5. Add formulas to Notion databases
-    print('[5/5] Adding one-click buttons to Notion...');
-
-    if (notionToken != null && maintenanceDbId != null && featureDbId != null) {
-      final notionClient = NotionClient(token: notionToken);
-
-      final fixExpression =
-          '"$workerUrl?issue=" + format(prop("Issue Number")) + "&type=bug&secret=$webhookSecret"';
-      final implementExpression =
-          '"$workerUrl?issue=" + format(prop("Issue Number")) + "&type=feature&secret=$webhookSecret"';
-
-      await notionClient.updateDatabase(maintenanceDbId, properties: {
-        'Fix': {
-          'formula': {'expression': fixExpression}
-        },
-      });
-      print('  + Maintenance Backlog: "Fix" button');
-
-      await notionClient.updateDatabase(featureDbId, properties: {
-        'Implement': {
-          'formula': {'expression': implementExpression}
-        },
-      });
-      print('  + Feature Backlog: "Implement" button');
-
-      notionClient.dispose();
-    } else {
-      print('  ! Missing Notion credentials, skipping formula creation.');
-      print('    Add formulas manually (see webhook/README.md).');
-    }
+    // 5. Print formulas for user to add to Notion
+    print('[5/5] One-click buttons...');
+    print('');
+    print('  Add a Formula property to each Notion database:');
+    print('');
+    print('  Maintenance Backlog — property name "Fix":');
+    print('    link("Fix", "$workerUrl?issue=" + format(prop("Issue Number")) + "&type=bug&secret=$webhookSecret")');
+    print('');
+    print('  Feature Backlog — property name "Implement":');
+    print('    link("Implement", "$workerUrl?issue=" + format(prop("Issue Number")) + "&type=feature&secret=$webhookSecret")');
 
     print('');
     print('=== Webhook deployed! ===');
     print('');
     print('Worker URL: $workerUrl');
-    print('Webhook secret: $webhookSecret');
     print('');
-    print('The "Fix" and "Implement" buttons are now live in Notion.');
+    print('Steps 1-4 are done automatically. For step 5, add the formulas above');
+    print('to your Notion databases (Add property > Formula > paste the expression).');
     print('');
 
     httpClient.close();
