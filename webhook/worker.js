@@ -1,4 +1,5 @@
-// Cloudflare Worker — triggers GitHub Actions "Implement Feature" workflow.
+// Cloudflare Worker — triggers Ghost Maintainer workflows from Notion.
+// Handles both bug fixes and feature implementations.
 // Deploy to Cloudflare Workers (free tier: 100K requests/day).
 //
 // Environment variables (set in Cloudflare dashboard):
@@ -8,7 +9,6 @@
 
 export default {
   async fetch(request, env) {
-    // Only allow GET (clickable from Notion) and POST
     if (request.method !== 'GET' && request.method !== 'POST') {
       return new Response('Method not allowed', { status: 405 });
     }
@@ -16,6 +16,7 @@ export default {
     const url = new URL(request.url);
     const issueNumber = url.searchParams.get('issue');
     const secret = url.searchParams.get('secret');
+    const type = url.searchParams.get('type') || 'feature'; // "bug" or "feature"
 
     if (!issueNumber) {
       return new Response('Missing ?issue= parameter', { status: 400 });
@@ -25,7 +26,9 @@ export default {
       return new Response('Unauthorized', { status: 401 });
     }
 
-    // Trigger GitHub Actions workflow_dispatch
+    const label = type === 'bug' ? 'Bug fix' : 'Feature implementation';
+
+    // Trigger the generic implement workflow
     const response = await fetch(
       `https://api.github.com/repos/${env.TARGET_REPO}/actions/workflows/implement_feature.yml/dispatches`,
       {
@@ -38,13 +41,12 @@ export default {
         },
         body: JSON.stringify({
           ref: 'main',
-          inputs: { issue_number: issueNumber },
+          inputs: { issue_number: issueNumber, type },
         }),
       }
     );
 
     if (response.status === 204) {
-      // Return a nice HTML page so the user sees confirmation
       return new Response(
         `<!DOCTYPE html>
 <html>
@@ -52,7 +54,7 @@ export default {
 <body style="font-family: system-ui; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #191919; color: #fff;">
   <div style="text-align: center;">
     <h1>Ghost Maintainer</h1>
-    <p style="font-size: 1.5em;">Feature #${issueNumber} implementation triggered!</p>
+    <p style="font-size: 1.5em;">${label} for #${issueNumber} triggered!</p>
     <p style="color: #888;">You can close this tab. Check GitHub Actions for progress.</p>
   </div>
 </body>

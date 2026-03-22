@@ -117,6 +117,18 @@ class NotionClient {
     _handle(response);
   }
 
+  Future<Map<String, dynamic>> updateDatabase(
+    String databaseId, {
+    required Map<String, dynamic> properties,
+  }) async {
+    final response = await _client.patch(
+      Uri.parse('$_baseUrl/databases/$databaseId'),
+      headers: _headers,
+      body: jsonEncode({'properties': properties}),
+    );
+    return _handle(response);
+  }
+
   Map<String, dynamic> _handle(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body) as Map<String, dynamic>;

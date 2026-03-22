@@ -1,12 +1,17 @@
-name: Implement Feature
+name: Ghost Maintainer - Implement
 
 on:
   workflow_dispatch:
     inputs:
       issue_number:
-        description: 'GitHub issue number to implement'
+        description: 'GitHub issue number'
         required: true
         type: number
+      type:
+        description: 'bug or feature'
+        required: false
+        type: string
+        default: 'feature'
 
 permissions:
   contents: write
@@ -38,11 +43,20 @@ jobs:
           echo "$ISSUE_JSON" | jq -r '.body // ""' >> $GITHUB_OUTPUT
           echo "GHEOF" >> $GITHUB_OUTPUT
 
-      - name: "Step 1: Investigate feature and propose implementation"
+      - name: Set database ID
+        id: db
+        run: |
+          if [ "${{ inputs.type }}" = "bug" ]; then
+            echo "id=${{ secrets.NOTION_DATABASE_ID }}" >> $GITHUB_OUTPUT
+          else
+            echo "id=${{ secrets.NOTION_FEATURE_DB_ID }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: "Step 1: Investigate and propose changes"
         working-directory: notion_setup
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          NOTION_DATABASE_ID: ${{ secrets.NOTION_FEATURE_DB_ID }}
+          NOTION_DATABASE_ID: ${{ steps.db.outputs.id }}
           NOTION_VISION_PAGE_ID: ${{ secrets.NOTION_VISION_PAGE_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           ISSUE_TITLE: ${{ steps.issue.outputs.title }}
@@ -55,7 +69,7 @@ jobs:
         working-directory: notion_setup
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          NOTION_DATABASE_ID: ${{ secrets.NOTION_FEATURE_DB_ID }}
+          NOTION_DATABASE_ID: ${{ steps.db.outputs.id }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_TITLE: ${{ steps.issue.outputs.title }}
           ISSUE_NUMBER: ${{ inputs.issue_number }}

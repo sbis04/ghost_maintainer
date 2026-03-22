@@ -30,7 +30,11 @@ class SetupCommand extends Command<void> {
           defaultsTo: 'sbis04/ghost-maintainer')
       ..addFlag('auto-fix-bugs',
           help: 'Auto-investigate bugs and create PRs',
-          defaultsTo: true);
+          defaultsTo: true)
+      ..addOption('webhook-url',
+          help: 'Cloudflare Worker URL for one-click buttons (optional)')
+      ..addOption('webhook-secret',
+          help: 'Webhook secret for one-click buttons (optional)');
   }
 
   @override
@@ -42,6 +46,8 @@ class SetupCommand extends Command<void> {
     final parentPageInput = argResults!['notion-parent-page-id'] as String?;
     final sourceRepo = argResults!['source-repo'] as String;
     final autoFixBugs = argResults!['auto-fix-bugs'] as bool;
+    final webhookUrl = argResults!['webhook-url'] as String?;
+    final webhookSecret = argResults!['webhook-secret'] as String?;
 
     // Auto-detect repo if not provided
     targetRepo ??= _detectRepo();
@@ -129,15 +135,41 @@ Get your tokens:
     final visionPageId = visionPage['id'] as String;
     print('  + Vision Statement');
 
-    // --- Step 3: Save and push config ---
-    print('[3/7] Creating config...');
+    // --- Step 3: Add one-click buttons (if webhook configured) ---
+    if (webhookUrl != null && webhookSecret != null) {
+      print('[3/8] Adding one-click buttons to Notion...');
+
+      final fixFormula =
+          '"$webhookUrl?issue=" + format(prop("Issue Number")) + "&type=bug&secret=$webhookSecret"';
+      final implementFormula =
+          '"$webhookUrl?issue=" + format(prop("Issue Number")) + "&type=feature&secret=$webhookSecret"';
+
+      await notionClient.updateDatabase(maintenanceDbId, properties: {
+        'Fix': {
+          'formula': {'expression': 'link("Fix", $fixFormula)'}
+        },
+      });
+      print('  + Maintenance Backlog: "Fix" button');
+
+      await notionClient.updateDatabase(featureDbId, properties: {
+        'Implement': {
+          'formula': {'expression': 'link("Implement", $implementFormula)'}
+        },
+      });
+      print('  + Feature Backlog: "Implement" button');
+    } else {
+      print('[3/8] Skipping one-click buttons (no --webhook-url provided)');
+    }
+
+    // --- Step 4: Save and push config ---
+    print('[4/8] Creating config...');
 
     final config = GhostConfig(autoFixBugs: autoFixBugs);
     config.save();
     print('  + .ghost_maintainer.json (auto_fix_bugs: $autoFixBugs)');
 
-    // --- Step 4: Add GitHub repo secrets ---
-    print('[4/7] Adding GitHub repo secrets...');
+    // --- Step 5: Add GitHub repo secrets ---
+    print('[5/8] Adding GitHub repo secrets...');
 
     final secrets = {
       'NOTION_TOKEN': notionToken,
@@ -167,8 +199,8 @@ Get your tokens:
       print('  Or add manually: https://github.com/$targetRepo/settings/secrets/actions');
     }
 
-    // --- Step 5: Enable PR creation for Actions ---
-    print('[5/7] Enabling GitHub Actions PR creation...');
+    // --- Step 6: Enable PR creation for Actions ---
+    print('[6/8] Enabling GitHub Actions PR creation...');
 
     final permResponse = await httpClient.put(
       Uri.parse(
@@ -190,8 +222,8 @@ Get your tokens:
       print('  ! Enable manually: Settings > Actions > General > Allow Actions to create PRs');
     }
 
-    // --- Step 6: Push config, workflows, and scripts ---
-    print('[6/7] Pushing files to $targetRepo...');
+    // --- Step 7: Push config, workflows, and scripts ---
+    print('[7/8] Pushing files to $targetRepo...');
 
     final filesToPush = [
       '.ghost_maintainer.json',
@@ -272,8 +304,8 @@ Get your tokens:
       }
     }
 
-    // --- Step 7: Write local env reference ---
-    print('[7/7] Writing local .ghost_maintainer.env...');
+    // --- Step 8: Write local env reference ---
+    print('[8/8] Writing local .ghost_maintainer.env...');
 
     final envContent = '''# Ghost Maintainer (auto-generated)
 NOTION_TOKEN=$notionToken
