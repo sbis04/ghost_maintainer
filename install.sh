@@ -54,14 +54,14 @@ if [ -z "$NOTION_TOKEN" ]; then
   read -p "Notion Integration Token: " NOTION_TOKEN
 fi
 
-read -p "Notion Page URL (paste the full link to your empty Ghost Maintainer page): " NOTION_PAGE_INPUT
+echo ""
+echo "  Before pasting the URL, make sure you've:"
+echo "    1. Created an EMPTY page in Notion"
+echo "    2. Connected your integration to it (... menu > Connections > select integration)"
+echo "    3. Copied the page URL (Share > Copy link)"
+echo ""
+read -p "Notion Page URL: " NOTION_PAGE_INPUT
 if [ -z "$NOTION_PAGE_INPUT" ]; then
-  echo ""
-  echo "  1. Create an EMPTY page in Notion called 'Ghost Maintainer'"
-  echo "     (don't add any content — the setup will populate it)"
-  echo "  2. Connect your integration (... menu > Connections)"
-  echo "  3. Copy the page URL (Share > Copy link)"
-  echo ""
   read -p "Notion Page URL: " NOTION_PAGE_INPUT
 fi
 
