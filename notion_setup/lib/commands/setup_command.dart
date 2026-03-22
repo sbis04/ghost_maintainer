@@ -346,14 +346,18 @@ GEMINI_API_KEY=$geminiKey
   }
 
   String _extractPageId(String input) {
-    // Try to extract 32-char hex from URL
-    final match = RegExp(r'[/-]([0-9a-fA-F]{32})').firstMatch(input);
+    // Strip query params
+    final clean = input.split('?').first.split('#').first;
+
+    // Extract last 32 hex chars (Notion page ID is always at the end of the URL slug)
+    final match = RegExp(r'([0-9a-fA-F]{32})').allMatches(clean).lastOrNull;
     if (match != null) return match.group(1)!;
-    // Try UUID format
-    final uuidMatch =
-        RegExp(r'([0-9a-fA-F-]{36})').firstMatch(input);
+
+    // Try UUID format (with dashes)
+    final uuidMatch = RegExp(r'([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})').firstMatch(clean);
     if (uuidMatch != null) return uuidMatch.group(1)!;
-    // Return as-is
-    return input;
+
+    // Return as-is (user pasted raw ID)
+    return input.trim();
   }
 }
