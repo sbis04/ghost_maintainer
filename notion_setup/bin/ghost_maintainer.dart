@@ -5,7 +5,8 @@ import 'package:args/command_runner.dart';
 import '../lib/commands/setup_command.dart';
 import '../lib/commands/config_command.dart';
 import '../lib/commands/sync_command.dart';
-import '../lib/commands/deploy_webhook_command.dart';
+import '../lib/commands/fix_command.dart';
+import '../lib/commands/implement_command.dart';
 
 void main(List<String> args) async {
   final runner = CommandRunner<void>(
@@ -15,7 +16,8 @@ void main(List<String> args) async {
     ..addCommand(SetupCommand())
     ..addCommand(ConfigCommand())
     ..addCommand(SyncCommand())
-    ..addCommand(DeployWebhookCommand());
+    ..addCommand(FixCommand())
+    ..addCommand(ImplementCommand());
 
   try {
     await runner.run(args);

@@ -3,7 +3,7 @@ set -e
 
 # Ghost Maintainer - One-command installer
 # Run from inside your GitHub repo:
-#   curl -sL https://raw.githubusercontent.com/sbis04/ghost_maintainer/main/install.sh | bash
+#   curl -sL https://raw.githubusercontent.com/sbis04/ghost_maintainer/main/install.sh -o install.sh && bash install.sh && rm install.sh
 
 GHOST_REPO="sbis04/ghost_maintainer"
 
@@ -89,42 +89,10 @@ if [[ "$AUTO_FIX" =~ ^[Nn] ]]; then
   AUTO_FIX_FLAG="--no-auto-fix-bugs"
 fi
 
-# --- Step 2: Cloudflare Worker for one-click buttons ---
+# --- Step 2: Install CLI and run setup ---
 
 echo ""
-echo "--- Step 2: Cloudflare Worker (for Fix/Implement buttons in Notion) ---"
-echo ""
-echo "  Ghost Maintainer needs a small webhook (Cloudflare Workers, free tier)"
-echo "  so you can trigger bug fixes and feature implementations from Notion."
-echo ""
-echo "  If you don't have a Cloudflare account yet:"
-echo "    1. Sign up at https://workers.cloudflare.com (free)"
-echo "    2. Go to https://dash.cloudflare.com — copy your Account ID from the sidebar"
-echo "    3. Go to https://dash.cloudflare.com/profile/api-tokens"
-echo "       → Create Token → use 'Edit Cloudflare Workers' template"
-echo ""
-
-read -p "Cloudflare Account ID: " CF_ACCOUNT_ID
-if [ -z "$CF_ACCOUNT_ID" ]; then
-  echo ""
-  echo "  Find it at: https://dash.cloudflare.com → sidebar → Account ID"
-  echo ""
-  read -p "Cloudflare Account ID: " CF_ACCOUNT_ID
-fi
-
-read -p "Cloudflare API Token: " CF_API_TOKEN
-if [ -z "$CF_API_TOKEN" ]; then
-  echo ""
-  echo "  Create one at: https://dash.cloudflare.com/profile/api-tokens"
-  echo "  Use the 'Edit Cloudflare Workers' template."
-  echo ""
-  read -p "Cloudflare API Token: " CF_API_TOKEN
-fi
-
-# --- Step 3: Install CLI and run setup ---
-
-echo ""
-echo "--- Step 3: Installing and running setup ---"
+echo "--- Step 2: Installing and running setup ---"
 echo ""
 
 echo "Installing Ghost Maintainer CLI..."
@@ -140,15 +108,7 @@ ghost_maintainer setup \
   --source-repo "$GHOST_REPO" \
   $AUTO_FIX_FLAG
 
-# --- Step 4: Deploy webhook ---
-
-echo ""
-ghost_maintainer deploy-webhook \
-  --cf-account-id "$CF_ACCOUNT_ID" \
-  --cf-api-token "$CF_API_TOKEN" \
-  --source-repo "$GHOST_REPO"
-
-# --- Step 5: Sync existing issues ---
+# --- Step 3: Sync existing issues ---
 
 echo ""
 read -p "Sync existing open issues to Notion? (y/N): " SYNC_ISSUES
@@ -160,10 +120,11 @@ echo ""
 echo "=== All done! ==="
 echo ""
 echo "Ghost Maintainer is active on $TARGET_REPO."
-echo "Create a GitHub issue to test, or use the Fix/Implement buttons in Notion."
+echo "Create a GitHub issue to test it."
 echo ""
 echo "Commands:"
-echo "  ghost_maintainer config          - view/change settings"
-echo "  ghost_maintainer sync            - import existing issues"
-echo "  ghost_maintainer deploy-webhook  - redeploy the webhook"
+echo "  ghost_maintainer fix <issue>        - investigate a bug and create a PR"
+echo "  ghost_maintainer implement <issue>  - implement a feature and create a PR"
+echo "  ghost_maintainer sync               - import existing issues"
+echo "  ghost_maintainer config             - view/change settings"
 echo ""

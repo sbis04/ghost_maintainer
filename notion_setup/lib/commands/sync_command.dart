@@ -34,7 +34,10 @@ class SyncCommand extends Command<void> {
           defaultsTo: 'open')
       ..addOption('limit',
           help: 'Max issues to sync (0 = all).',
-          defaultsTo: '0');
+          defaultsTo: '0')
+      ..addFlag('triage',
+          help: 'Trigger AI triage for each synced issue.',
+          defaultsTo: true);
   }
 
   @override
@@ -218,10 +221,46 @@ Usage:
 
     print('');
     print('Synced $synced issues to Triage Queue.');
-    print('');
-    print('Next: create a GitHub Action run or use the MCP server to triage them.');
-    print('The next time a new issue is created, the triage workflow will also');
-    print('pick up these synced issues if they\'re still in "New" stage.');
+
+    // Trigger triage for each synced issue
+    final shouldTriage = argResults!['triage'] as bool;
+    if (shouldTriage && synced > 0) {
+      print('');
+      print('Triggering AI triage for each issue...');
+
+      for (final issue in toSync) {
+        final number = issue['number'] as int;
+        final title = issue['title'] as String? ?? '';
+
+        final triageResponse = await httpClient.post(
+          Uri.parse(
+              'https://api.github.com/repos/$repo/actions/workflows/triage_issue.yml/dispatches'),
+          headers: {
+            'Authorization': 'token $githubToken',
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'ref': 'main',
+            'inputs': {'issue_number': '$number'},
+          }),
+        );
+
+        if (triageResponse.statusCode == 204) {
+          print('  + #$number: $title');
+        } else {
+          print('  ! #$number: failed (${triageResponse.statusCode})');
+        }
+
+        // Small delay to avoid hitting rate limits
+        await Future.delayed(Duration(milliseconds: 500));
+      }
+
+      print('');
+      print('Triage workflows triggered. Check GitHub Actions for progress:');
+      print('  https://github.com/$repo/actions');
+    }
+
     print('');
 
     httpClient.close();

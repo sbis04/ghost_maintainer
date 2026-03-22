@@ -1,0 +1,91 @@
+name: Ghost Maintainer - Triage
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'GitHub issue number to triage'
+        required: true
+        type: number
+
+permissions:
+  contents: write
+  issues: read
+  pull-requests: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install dependencies
+        working-directory: notion_setup
+        run: dart pub get
+
+      - name: Fetch issue details
+        id: issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_JSON=$(gh api repos/${{ github.repository }}/issues/${{ inputs.issue_number }})
+          echo "title=$(echo "$ISSUE_JSON" | jq -r '.title')" >> $GITHUB_OUTPUT
+          echo "body<<GHEOF" >> $GITHUB_OUTPUT
+          echo "$ISSUE_JSON" | jq -r '.body // ""' >> $GITHUB_OUTPUT
+          echo "GHEOF" >> $GITHUB_OUTPUT
+
+      - name: Read config
+        id: config
+        run: |
+          if [ -f .ghost_maintainer.json ]; then
+            AUTO_FIX=$(cat .ghost_maintainer.json | python3 -c "import sys,json; print(json.load(sys.stdin).get('auto_fix_bugs', True))" 2>/dev/null || echo "True")
+            echo "auto_fix_bugs=$AUTO_FIX" >> $GITHUB_OUTPUT
+          else
+            echo "auto_fix_bugs=True" >> $GITHUB_OUTPUT
+          fi
+
+      - name: "Step 1: Auto-triage and route"
+        id: triage
+        working-directory: notion_setup
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_TRIAGE_DB_ID: ${{ secrets.NOTION_TRIAGE_DB_ID }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          NOTION_FEATURE_DB_ID: ${{ secrets.NOTION_FEATURE_DB_ID }}
+          NOTION_VISION_PAGE_ID: ${{ secrets.NOTION_VISION_PAGE_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ISSUE_TITLE: ${{ steps.issue.outputs.title }}
+          ISSUE_BODY: ${{ steps.issue.outputs.body }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+        run: dart run bin/auto_triage.dart
+
+      - name: "Step 2: Investigate bug and propose fix"
+        if: steps.triage.outputs.issue_type == 'bug' && steps.config.outputs.auto_fix_bugs == 'True'
+        working-directory: notion_setup
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          NOTION_VISION_PAGE_ID: ${{ secrets.NOTION_VISION_PAGE_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ISSUE_TITLE: ${{ steps.issue.outputs.title }}
+          ISSUE_BODY: ${{ steps.issue.outputs.body }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+        run: dart run bin/auto_investigate.dart
+
+      - name: "Step 3: Create branch and PR for bug fix"
+        if: steps.triage.outputs.issue_type == 'bug' && steps.config.outputs.auto_fix_bugs == 'True'
+        working-directory: notion_setup
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_TITLE: ${{ steps.issue.outputs.title }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+          TARGET_REPO: ${{ github.repository }}
+        run: dart run bin/auto_deploy.dart
