@@ -5,6 +5,9 @@ set -e
 # Run from inside your GitHub repo:
 #   curl -sL https://raw.githubusercontent.com/sbis04/ghost_maintainer/main/install.sh | bash
 
+# When piped via curl, stdin is the script itself. Read user input from /dev/tty.
+exec < /dev/tty
+
 GHOST_REPO="sbis04/ghost_maintainer"
 
 echo ""
