@@ -23,6 +23,16 @@ jobs:
         working-directory: notion_setup
         run: dart pub get
 
+      - name: Read config
+        id: config
+        run: |
+          if [ -f .ghost_maintainer.json ]; then
+            AUTO_FIX=$(cat .ghost_maintainer.json | python3 -c "import sys,json; print(json.load(sys.stdin).get('auto_fix_bugs', True))" 2>/dev/null || echo "True")
+            echo "auto_fix_bugs=$AUTO_FIX" >> $GITHUB_OUTPUT
+          else
+            echo "auto_fix_bugs=True" >> $GITHUB_OUTPUT
+          fi
+
       - name: "Step 1: Ingest issue to Triage Queue"
         working-directory: notion_setup
         env:
@@ -47,12 +57,10 @@ jobs:
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: |
-          dart run bin/auto_triage.dart
-          echo "Triage step completed"
+        run: dart run bin/auto_triage.dart
 
       - name: "Step 3: Investigate bug and propose fix"
-        if: steps.triage.outputs.issue_type == 'bug'
+        if: steps.triage.outputs.issue_type == 'bug' && steps.config.outputs.auto_fix_bugs == 'True'
         working-directory: notion_setup
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
@@ -66,7 +74,7 @@ jobs:
         run: dart run bin/auto_investigate.dart
 
       - name: "Step 4: Create branch and PR for bug fix"
-        if: steps.triage.outputs.issue_type == 'bug'
+        if: steps.triage.outputs.issue_type == 'bug' && steps.config.outputs.auto_fix_bugs == 'True'
         working-directory: notion_setup
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
