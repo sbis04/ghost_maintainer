@@ -226,21 +226,21 @@ Other values are read from .ghost_maintainer.env (created by setup).
     if (notionToken != null && maintenanceDbId != null && featureDbId != null) {
       final notionClient = NotionClient(token: notionToken);
 
-      final fixFormula =
-          '"$workerUrl?issue=" + format(prop("Issue Number")) + "&type=bug&secret=$webhookSecret"';
-      final implementFormula =
-          '"$workerUrl?issue=" + format(prop("Issue Number")) + "&type=feature&secret=$webhookSecret"';
+      final fixExpression =
+          'link("Fix", "$workerUrl?issue=" + format(prop("Issue Number")) + "&type=bug&secret=$webhookSecret")';
+      final implementExpression =
+          'link("Implement", "$workerUrl?issue=" + format(prop("Issue Number")) + "&type=feature&secret=$webhookSecret")';
 
       await notionClient.updateDatabase(maintenanceDbId, properties: {
         'Fix': {
-          'formula': {'expression': 'link("Fix", $fixFormula)'}
+          'formula': {'expression': fixExpression}
         },
       });
       print('  + Maintenance Backlog: "Fix" button');
 
       await notionClient.updateDatabase(featureDbId, properties: {
         'Implement': {
-          'formula': {'expression': 'link("Implement", $implementFormula)'}
+          'formula': {'expression': implementExpression}
         },
       });
       print('  + Feature Backlog: "Implement" button');

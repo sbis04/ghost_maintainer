@@ -139,21 +139,21 @@ Get your tokens:
     if (webhookUrl != null && webhookSecret != null) {
       print('[3/8] Adding one-click buttons to Notion...');
 
-      final fixFormula =
-          '"$webhookUrl?issue=" + format(prop("Issue Number")) + "&type=bug&secret=$webhookSecret"';
-      final implementFormula =
-          '"$webhookUrl?issue=" + format(prop("Issue Number")) + "&type=feature&secret=$webhookSecret"';
+      final fixExpression =
+          'link("Fix", "$webhookUrl?issue=" + format(prop("Issue Number")) + "&type=bug&secret=$webhookSecret")';
+      final implementExpression =
+          'link("Implement", "$webhookUrl?issue=" + format(prop("Issue Number")) + "&type=feature&secret=$webhookSecret")';
 
       await notionClient.updateDatabase(maintenanceDbId, properties: {
         'Fix': {
-          'formula': {'expression': 'link("Fix", $fixFormula)'}
+          'formula': {'expression': fixExpression}
         },
       });
       print('  + Maintenance Backlog: "Fix" button');
 
       await notionClient.updateDatabase(featureDbId, properties: {
         'Implement': {
-          'formula': {'expression': 'link("Implement", $implementFormula)'}
+          'formula': {'expression': implementExpression}
         },
       });
       print('  + Feature Backlog: "Implement" button');
