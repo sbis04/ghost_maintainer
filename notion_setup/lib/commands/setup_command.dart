@@ -222,8 +222,67 @@ Get your tokens:
       print('  ! Enable manually: Settings > Actions > General > Allow Actions to create PRs');
     }
 
-    // --- Step 7: Push config, workflows, and scripts ---
-    print('[7/8] Pushing files to $targetRepo...');
+    // --- Step 7: Update .gitignore ---
+    print('[7/8] Updating .gitignore...');
+
+    // Fetch existing .gitignore from repo
+    final gitignoreResponse = await httpClient.get(
+      Uri.parse(
+          'https://api.github.com/repos/$targetRepo/contents/.gitignore'),
+      headers: {
+        'Authorization': 'token $githubToken',
+        'Accept': 'application/vnd.github.v3+json',
+      },
+    );
+
+    String gitignoreContent = '';
+    String? gitignoreSha;
+    if (gitignoreResponse.statusCode == 200) {
+      final data =
+          jsonDecode(gitignoreResponse.body) as Map<String, dynamic>;
+      gitignoreSha = data['sha'] as String?;
+      gitignoreContent =
+          utf8.decode(base64Decode((data['content'] as String).replaceAll('\n', '')));
+    }
+
+    const ghostIgnoreEntries = '''
+
+# Ghost Maintainer
+.ghost_maintainer.env
+''';
+
+    if (!gitignoreContent.contains('.ghost_maintainer.env')) {
+      gitignoreContent += ghostIgnoreEntries;
+
+      final gitignoreBody = <String, dynamic>{
+        'message': 'chore: add Ghost Maintainer entries to .gitignore',
+        'content': base64Encode(utf8.encode(gitignoreContent)),
+      };
+      if (gitignoreSha != null) gitignoreBody['sha'] = gitignoreSha;
+
+      final updateResponse = await httpClient.put(
+        Uri.parse(
+            'https://api.github.com/repos/$targetRepo/contents/.gitignore'),
+        headers: {
+          'Authorization': 'token $githubToken',
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(gitignoreBody),
+      );
+
+      if (updateResponse.statusCode == 200 ||
+          updateResponse.statusCode == 201) {
+        print('  + .gitignore updated');
+      } else {
+        print('  ! .gitignore: ${updateResponse.statusCode}');
+      }
+    } else {
+      print('  + .gitignore already has Ghost Maintainer entries');
+    }
+
+    // --- Step 8: Push config, workflows, and scripts ---
+    print('[8/9] Pushing files to $targetRepo...');
 
     final filesToPush = [
       '.ghost_maintainer.json',
@@ -304,8 +363,8 @@ Get your tokens:
       }
     }
 
-    // --- Step 8: Write local env reference ---
-    print('[8/8] Writing local .ghost_maintainer.env...');
+    // --- Step 9: Write local env reference ---
+    print('[9/9] Writing local .ghost_maintainer.env...');
 
     final envContent = '''# Ghost Maintainer (auto-generated)
 NOTION_TOKEN=$notionToken
