@@ -3,9 +3,9 @@ set -e
 
 # Ghost Maintainer - One-command installer
 # Run from inside your GitHub repo:
-#   curl -sL https://raw.githubusercontent.com/sbis04/ghost-maintainer/main/install.sh | bash
+#   curl -sL https://raw.githubusercontent.com/sbis04/ghost_maintainer/main/install.sh | bash
 
-GHOST_REPO="sbis04/ghost-maintainer"
+GHOST_REPO="sbis04/ghost_maintainer"
 
 echo ""
 echo "=== Ghost Maintainer Installer ==="

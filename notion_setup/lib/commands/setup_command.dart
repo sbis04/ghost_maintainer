@@ -27,7 +27,7 @@ class SetupCommand extends Command<void> {
       ..addOption('notion-parent-page-id', help: 'Notion page URL or ID')
       ..addOption('source-repo',
           help: 'Ghost Maintainer source repo',
-          defaultsTo: 'sbis04/ghost-maintainer')
+          defaultsTo: 'sbis04/ghost_maintainer')
       ..addFlag('auto-fix-bugs',
           help: 'Auto-investigate bugs and create PRs',
           defaultsTo: true)

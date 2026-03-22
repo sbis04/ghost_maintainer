@@ -18,7 +18,7 @@ void main(List<String> args) async {
   final geminiKey = parsed['gemini-key'];
   final targetRepo = parsed['repo'];
   final parentPageId = parsed['notion-parent-page-id'];
-  final sourceRepo = parsed['source-repo'] ?? 'sbis04/ghost-maintainer';
+  final sourceRepo = parsed['source-repo'] ?? 'sbis04/ghost_maintainer';
 
   if (notionToken == null ||
       githubToken == null ||

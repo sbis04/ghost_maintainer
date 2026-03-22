@@ -35,7 +35,7 @@ class DeployWebhookCommand extends Command<void> {
           help: 'Cloudflare Worker name', defaultsTo: 'ghost-maintainer')
       ..addOption('source-repo',
           help: 'Ghost Maintainer source repo',
-          defaultsTo: 'sbis04/ghost-maintainer');
+          defaultsTo: 'sbis04/ghost_maintainer');
   }
 
   @override

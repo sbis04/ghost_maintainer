@@ -27,7 +27,7 @@ Then create an **empty** page in Notion (call it whatever you want), connect you
 From inside your repo:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/sbis04/ghost-maintainer/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/sbis04/ghost_maintainer/main/install.sh | bash
 ```
 
 It walks you through everything: tokens, Notion setup, Cloudflare Worker deployment, and optionally syncs your existing issues.
@@ -35,7 +35,7 @@ It walks you through everything: tokens, Notion setup, Cloudflare Worker deploym
 ### Or install the CLI manually
 
 ```bash
-dart pub global activate --source git https://github.com/sbis04/ghost-maintainer.git --git-path notion_setup
+dart pub global activate --source git https://github.com/sbis04/ghost_maintainer.git --git-path notion_setup
 ```
 
 ```bash
