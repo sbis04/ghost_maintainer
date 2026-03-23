@@ -45,12 +45,13 @@ echo ""
 echo "--- Step 1: API Tokens ---"
 echo ""
 
+echo "  If you don't have a Notion integration yet:"
+echo "    1. Go to https://www.notion.so/profile/integrations"
+echo "    2. Click 'New integration', name it, select your workspace, click Submit"
+echo "    3. Copy the 'Internal Integration Secret' (starts with ntn_)"
+echo ""
 read -p "Notion Integration Token (ntn_...): " NOTION_TOKEN
 if [ -z "$NOTION_TOKEN" ]; then
-  echo ""
-  echo "  Get one at: https://www.notion.so/profile/integrations"
-  echo "  Create an internal integration with read/write permissions."
-  echo ""
   read -p "Notion Integration Token: " NOTION_TOKEN
 fi
 

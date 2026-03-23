@@ -14,11 +14,17 @@ Grab three API keys before you start:
 
 | What | Where | Notes |
 |---|---|---|
-| Notion token | [notion.so/profile/integrations](https://www.notion.so/profile/integrations) | Internal integration, read + write permissions |
+| Notion token | [notion.so/profile/integrations](https://www.notion.so/profile/integrations) | See steps below |
 | GitHub PAT | [github.com/settings/tokens](https://github.com/settings/tokens) | Classic token, `repo` + `actions` scopes |
 | Gemini key | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) | Any project works |
 
-Then create an **empty** page in Notion (call it whatever you want), connect your integration to it (page `...` menu > Connections), and copy the page URL.
+**Notion setup (1 minute):**
+1. Go to [notion.so/profile/integrations](https://www.notion.so/profile/integrations) → **New integration**
+2. Give it a name (e.g. "Ghost Maintainer"), select your workspace, click **Submit**
+3. Copy the **Internal Integration Secret** (starts with `ntn_`)
+4. Create an **empty** page in Notion (call it whatever you want)
+5. On that page, click `...` (top right) → **Connections** → select your integration
+6. Copy the page URL (Share → Copy link)
 
 ### Quick install
 
