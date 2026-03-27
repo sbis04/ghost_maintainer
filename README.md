@@ -1,5 +1,8 @@
 # Ghost Maintainer
 
+<img width="1280" height="640" alt="ghost maintainer cover" src="https://github.com/user-attachments/assets/979938f8-370b-4185-a662-531630d50e7c" />
+
+
 Solo maintainers wear too many hats. Ghost Maintainer takes over the repetitive parts — triaging issues, reading code, writing fixes, and opening PRs — so you can focus on the work that actually needs a human.
 
 It uses Notion as an operations center. Bugs get triaged and fixed automatically. Features queue up until you're ready. Everything stays visible in Notion so you never lose track.
