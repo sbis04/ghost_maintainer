@@ -108,6 +108,8 @@ Bugs go through the full pipeline automatically (if `auto_fix_bugs` is on). Feat
 
 ### Notion databases
 
+<img height="915" alt="Ghost Maintainer Notion Page" src="https://github.com/user-attachments/assets/cf96e98e-86c0-4eac-8a46-c0f5aa8ce0ef" />
+
 The setup creates five things under your page:
 
 - **Triage Queue** — where every issue lands first. AI sorts it.
