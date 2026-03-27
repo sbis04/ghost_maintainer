@@ -21,6 +21,9 @@ Grab three API keys before you start:
 | GitHub PAT | [github.com/settings/tokens](https://github.com/settings/tokens) | Classic token, `repo` + `actions` scopes |
 | Gemini key | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) | Any project works |
 
+You can either follow the steps in the next section, or have a look at the [**demo video**](https://youtu.be/AwVQcZSCFgM?si=yRfQOhqyjYBC6zYR) to learn more about the tool and get step-by-step instruction for installing Ghost Maintainer for your repository.
+
+
 **Notion setup (1 minute):**
 1. Go to [notion.so/profile/integrations](https://www.notion.so/profile/integrations) → **New integration**
 2. Give it a name (e.g. "Ghost Maintainer"), select your workspace, click **Submit**
