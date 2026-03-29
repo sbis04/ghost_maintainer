@@ -37,20 +37,28 @@ base class GhostMaintainerServer extends MCPServer
           instructions: '''Ghost Maintainer is an AI-powered junior partner for solo open-source maintainers.
 It uses Notion as the operations center to triage GitHub issues, investigate code, propose fixes, and open PRs.
 
-Available tools:
+This server works alongside the Notion MCP server (@notionhq/notion-mcp-server).
+Use Notion MCP tools (search, retrieve-a-page, create-a-page, append-block-children)
+for general Notion workspace operations, and Ghost Maintainer tools for the
+specialized maintenance workflow built on top of Notion.
+
+Ghost Maintainer tools:
 - ghost_get_backlog: View the maintenance backlog from Notion
 - ghost_triage_issue: AI-powered issue triage with priority and label assignment
 - ghost_investigate_issue: Deep code investigation with proposed fix
 - ghost_deploy_fix: Create a GitHub branch and PR from proposed fix
 - ghost_sync_status: Manually update an issue's stage
 
-Available resources:
-- ghost://vision: Project vision statement
-- ghost://backlog/summary: Dynamic backlog summary with counts
+Ghost Maintainer resources:
+- ghost://vision: Project vision statement (from Notion)
+- ghost://backlog/summary: Dynamic backlog summary with counts (from Notion)
 
-Available prompts:
+Ghost Maintainer prompts:
 - triage: Get a structured triage prompt for an issue
-- investigate: Get a code investigation prompt for an issue''',
+- investigate: Get a code investigation prompt for an issue
+
+Workflow: Use Notion MCP to browse the workspace and find issues, then use
+Ghost Maintainer tools to triage, investigate, and deploy fixes.''',
         ) {
     notion = NotionService(token: config.notionToken, databaseId: config.notionDatabaseId);
     github = GitHubService(token: config.githubToken);

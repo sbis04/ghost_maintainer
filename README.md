@@ -80,6 +80,66 @@ ghost_maintainer config --auto-fix-bugs=false   # stop auto-creating PRs for bug
 
 Settings live in `.ghost_maintainer.json` in your repo and get pushed to GitHub automatically. Sync and fix/implement commands read tokens from `.ghost_maintainer.env` (created by setup).
 
+### Connect Notion MCP (for interactive AI use)
+
+If you want to use Ghost Maintainer interactively through an AI client (Gemini CLI, Claude, Cursor), set up both Notion MCP and Ghost Maintainer MCP together.
+
+**1. Install the Notion MCP server:**
+
+```bash
+npm install -g @notionhq/notion-mcp-server
+```
+
+**2. Add both servers to your AI client:**
+
+**Gemini CLI:**
+
+```bash
+gemini mcp add notion -- npx -y @notionhq/notion-mcp-server
+# Set NOTION_TOKEN in the Gemini CLI MCP settings
+
+gemini mcp add ghost-maintainer -- dart run bin/server.dart
+# Set env vars in the Gemini CLI MCP settings (cwd: /path/to/ghost_maintainer_mcp)
+```
+
+**Claude Code:**
+
+```bash
+claude mcp add notion -- npx -y @notionhq/notion-mcp-server
+claude mcp add ghost-maintainer -- dart run bin/server.dart
+```
+
+**Cursor / other MCP clients** — add to `.cursor/mcp.json` or equivalent:
+
+```json
+{
+  "mcpServers": {
+    "notion": {
+      "command": "npx",
+      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "env": {
+        "NOTION_TOKEN": "ntn_..."
+      }
+    },
+    "ghost-maintainer": {
+      "command": "dart",
+      "args": ["run", "bin/server.dart"],
+      "cwd": "/path/to/ghost_maintainer_mcp",
+      "env": {
+        "NOTION_TOKEN": "ntn_...",
+        "NOTION_DATABASE_ID": "...",
+        "NOTION_VISION_PAGE_ID": "...",
+        "GITHUB_TOKEN": "ghp_...",
+        "TARGET_REPO": "owner/repo",
+        "GEMINI_API_KEY": "..."
+      }
+    }
+  }
+}
+```
+
+Notion MCP gives the AI general workspace access. Ghost Maintainer MCP adds the maintenance tools. See the [MCP Server](#mcp-server) section for details.
+
 ## How it works
 
 ```
@@ -120,7 +180,14 @@ The setup creates five things under your page:
 
 ## MCP Server
 
-There's also a full MCP server (`ghost_maintainer_mcp/`) you can connect to Gemini CLI, Claude, or any MCP client. It exposes 5 tools, 2 resources, and 2 prompts.
+Ghost Maintainer ships with a Dart MCP server that works alongside **[Notion MCP](https://developers.notion.com/guides/mcp/mcp)** (`@notionhq/notion-mcp-server`). Both servers connect to the same AI client:
+
+- **Notion MCP** handles general workspace operations — searching, reading pages, creating content
+- **Ghost Maintainer MCP** handles the specialized maintenance workflow — triage, investigation, deployment
+
+Together, they give your AI assistant full access to both your Notion workspace and the Ghost Maintainer pipeline.
+
+### Ghost Maintainer MCP tools
 
 | Type | Name | What it does |
 |---|---|---|
@@ -129,31 +196,13 @@ There's also a full MCP server (`ghost_maintainer_mcp/`) you can connect to Gemi
 | Tool | `ghost_investigate_issue` | Read code and propose fixes |
 | Tool | `ghost_deploy_fix` | Create a branch and PR |
 | Tool | `ghost_sync_status` | Update issue stage manually |
-| Resource | `ghost://vision` | Vision statement |
-| Resource | `ghost://backlog/summary` | Backlog stats |
-| Prompt | `triage` / `investigate` | Structured prompts for each workflow |
+| Resource | `ghost://vision` | Vision statement (from Notion) |
+| Resource | `ghost://backlog/summary` | Backlog stats (from Notion) |
+| Prompt | `triage` / `investigate` | Structured prompts referencing both Notion MCP and Ghost Maintainer tools |
 
-MCP config for Gemini CLI or Claude:
+See the [Getting Started](#connect-notion-mcp-for-interactive-ai-use) section for setup instructions, or check [`mcp_config.example.json`](mcp_config.example.json).
 
-```json
-{
-  "mcpServers": {
-    "ghost-maintainer": {
-      "command": "dart",
-      "args": ["run", "bin/server.dart"],
-      "cwd": "/path/to/ghost_maintainer_mcp",
-      "env": {
-        "NOTION_TOKEN": "ntn_...",
-        "NOTION_DATABASE_ID": "...",
-        "NOTION_VISION_PAGE_ID": "...",
-        "GITHUB_TOKEN": "ghp_...",
-        "TARGET_REPO": "owner/repo",
-        "GEMINI_API_KEY": "..."
-      }
-    }
-  }
-}
-```
+The prompts guide the AI to use both servers — e.g., the triage prompt tells the AI to use Notion MCP's search to check for duplicates before triaging with Ghost Maintainer tools.
 
 ## Project structure
 

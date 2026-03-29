@@ -53,7 +53,9 @@ Please analyze this issue and provide:
 3. **Summary** — one paragraph describing the issue and recommended action
 4. **Reasoning** — your detailed analysis of why you assigned this priority and these labels
 
-Then call the ghost_triage_issue tool with the appropriate page_id to apply your triage.''',
+Use the Notion MCP search tool to check if similar issues already exist in the backlog.
+Then call the ghost_triage_issue tool with the appropriate page_id to apply your triage.
+After triaging, use Notion MCP's create-a-page or append-block-children to add any additional notes.''',
             ),
           ),
         ],

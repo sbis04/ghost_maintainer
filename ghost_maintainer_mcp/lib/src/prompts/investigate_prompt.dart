@@ -64,8 +64,10 @@ Please:
 3. Propose a specific code fix with a unified diff
 4. Explain the fix and your confidence level (0-100)
 
+Use Notion MCP's retrieve-a-page to read the full issue details and any prior triage notes from Notion.
 Then call the ghost_investigate_issue tool with the appropriate page_id to apply your investigation.
-If you know which files to focus on, pass them as file_hints.''',
+If you know which files to focus on, pass them as file_hints.
+After investigating, use Notion MCP's append-block-children to add your analysis to the Notion page.''',
             ),
           ),
         ],

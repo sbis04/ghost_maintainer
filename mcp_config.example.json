@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "notion": {
+      "command": "npx",
+      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "env": {
+        "NOTION_TOKEN": "ntn_YOUR_TOKEN"
+      }
+    },
+    "ghost-maintainer": {
+      "command": "dart",
+      "args": ["run", "bin/server.dart"],
+      "cwd": "/path/to/ghost_maintainer_mcp",
+      "env": {
+        "NOTION_TOKEN": "ntn_YOUR_TOKEN",
+        "NOTION_DATABASE_ID": "YOUR_MAINTENANCE_BACKLOG_ID",
+        "NOTION_VISION_PAGE_ID": "YOUR_VISION_PAGE_ID",
+        "GITHUB_TOKEN": "ghp_YOUR_TOKEN",
+        "TARGET_REPO": "owner/repo",
+        "GEMINI_API_KEY": "YOUR_GEMINI_KEY"
+      }
+    }
+  }
+}
